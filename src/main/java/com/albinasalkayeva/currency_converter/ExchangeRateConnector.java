@@ -86,7 +86,7 @@ public class ExchangeRateConnector {
         return false;
     }
 
-    protected static Map<String, String> getSupportedCodes() throws IOException {
+    protected static Map<String, String> getSupportedCodesAndCurrencies() throws IOException {
 
         String fileName = "supported_codes.json";
 

@@ -5,38 +5,98 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public class ExchangeRateData {
-    private Map<String, String> supportedCodes;
+    private Map<String, String> supportedCodesAndCurrencies;
     private String chosenBaseCurrency;
     private Map<String, BigDecimal> conversionRates;
+    private String chosenTargetCurrency;
 
-    public Map<String, String> getSupportedCodes() {
-        if (supportedCodes == null) {
-            populateSupportedCodes();
+    public Map<String, String> getSupportedCodesAndCurrencies() {
+        if (supportedCodesAndCurrencies == null) {
+            populateSupportedCodesAndCurrencies();
         }
-        return supportedCodes;
+        return supportedCodesAndCurrencies;
     }
 
     public Map<String, BigDecimal> getConversionRates(final String currencyCode) {
+        if (!isCurrencyCodeSupported(currencyCode)) {
+            throw new CurrencyCodeNotSupportedException();
+        }
         if (!currencyCode.equals(chosenBaseCurrency) || conversionRates == null) {
             populateConversionRates(currencyCode);
         }
         return conversionRates;
     }
 
-    private void populateSupportedCodes() {
+    public void populateSupportedCodesAndCurrencies() {
         try {
-            supportedCodes = ExchangeRateConnector.getSupportedCodes();
+            supportedCodesAndCurrencies = ExchangeRateConnector.getSupportedCodesAndCurrencies();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void populateConversionRates(final String currencyCode) {
+    public void populateConversionRates(final String currencyCode) {
+        if (!isCurrencyCodeSupported(currencyCode)) {
+            throw new CurrencyCodeNotSupportedException();
+        }
         try {
             conversionRates = ExchangeRateConnector.getConversionRates(currencyCode);
             chosenBaseCurrency = currencyCode;
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void populateConversionRates() {
+        if (!isCurrencyCodeSupported(chosenBaseCurrency)) {
+            throw new CurrencyCodeNotSupportedException();
+        }
+        try {
+            conversionRates = ExchangeRateConnector.getConversionRates(chosenBaseCurrency);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void printSupportedCodesAndCurrencies() {
+        System.out.println("Supported codes:");
+
+        for (Map.Entry<String, String> codeAndCurrency : supportedCodesAndCurrencies.entrySet()) {
+            System.out.println(codeAndCurrency.getKey() + " - " + codeAndCurrency.getValue());
+        }
+    }
+
+    public boolean isCurrencyCodeSupported(final String currencyCode) {
+        return supportedCodesAndCurrencies.containsKey(currencyCode);
+    }
+
+    public String getChosenBaseCurrency() {
+        return chosenBaseCurrency;
+    }
+
+    public void setChosenBaseCurrency(String currencyCode) {
+        if (!isCurrencyCodeSupported(currencyCode)) {
+            throw new CurrencyCodeNotSupportedException();
+        }
+        chosenBaseCurrency = currencyCode;
+    }
+
+    public String getChosenTargetCurrency() {
+        return chosenTargetCurrency;
+    }
+
+    public void setChosenTargetCurrency(String currencyCode) {
+        if (!isCurrencyCodeSupported(currencyCode)) {
+            throw new CurrencyCodeNotSupportedException();
+        }
+        chosenTargetCurrency = currencyCode;
+    }
+
+    public BigDecimal convertMoneyFromBaseToTargetCurrency(final BigDecimal moneyAmount) {
+        return moneyAmount.multiply(getConversionRateOfTargetCurrency());
+    }
+
+    public BigDecimal getConversionRateOfTargetCurrency() {
+        return conversionRates.get(chosenTargetCurrency);
     }
 }
