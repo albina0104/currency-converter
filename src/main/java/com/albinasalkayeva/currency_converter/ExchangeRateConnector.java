@@ -40,7 +40,7 @@ public class ExchangeRateConnector {
 
     protected static Map<String, BigDecimal> getConversionRates(final String currencyCode) throws IOException {
 
-        String fileName = "conversion_rates.json";
+        String fileName = "conversion_rates_" + currencyCode + ".json";
 
         JSONObject conversionRatesJson = null;
 
