@@ -5,10 +5,15 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public class ExchangeRateData {
+    private final ExchangeRateConnector connector;
     private Map<String, String> supportedCodesAndCurrencies;
     private String chosenBaseCurrency;
     private Map<String, BigDecimal> conversionRates;
     private String chosenTargetCurrency;
+
+    public ExchangeRateData(ExchangeRateConnector connector) {
+        this.connector = connector;
+    }
 
     public Map<String, String> getSupportedCodesAndCurrencies() {
         if (supportedCodesAndCurrencies == null) {
@@ -29,7 +34,7 @@ public class ExchangeRateData {
 
     public void populateSupportedCodesAndCurrencies() {
         try {
-            supportedCodesAndCurrencies = ExchangeRateConnector.getSupportedCodesAndCurrencies();
+            supportedCodesAndCurrencies = connector.getSupportedCodesAndCurrencies();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,7 +45,7 @@ public class ExchangeRateData {
             throw new CurrencyCodeNotSupportedException();
         }
         try {
-            conversionRates = ExchangeRateConnector.getConversionRates(currencyCode);
+            conversionRates = connector.getConversionRates(currencyCode);
             chosenBaseCurrency = currencyCode;
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,7 +57,7 @@ public class ExchangeRateData {
             throw new CurrencyCodeNotSupportedException();
         }
         try {
-            conversionRates = ExchangeRateConnector.getConversionRates(chosenBaseCurrency);
+            conversionRates = connector.getConversionRates(chosenBaseCurrency);
         } catch (IOException e) {
             e.printStackTrace();
         }

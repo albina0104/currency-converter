@@ -5,7 +5,9 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        ExchangeRateData exchangeRateData = new ExchangeRateData();
+        JsonAndFileHelper jsonAndFileHelper = new JsonAndFileHelper();
+        ExchangeRateConnector exchangeRateConnector = new ExchangeRateConnector(jsonAndFileHelper);
+        ExchangeRateData exchangeRateData = new ExchangeRateData(exchangeRateConnector);
 
         exchangeRateData.populateSupportedCodesAndCurrencies();
         System.out.println();
