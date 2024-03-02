@@ -16,27 +16,13 @@ public class JsonAndFileHelper {
         return new JSONObject(json);
     }
 
-    public static void saveJsonToFile(JSONObject jsonObject, String fileName) {
-        try (FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)
-        ) {
-            objectOutputStream.writeObject(jsonObject.toString());
-            objectOutputStream.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void saveJsonToFile(JSONObject jsonObject, String fileName) throws IOException {
+        Files.writeString(Path.of(fileName), jsonObject.toString(), StandardCharsets.UTF_8);
     }
 
-    public static JSONObject getJsonFromFile(String fileName) {
-        try (FileInputStream fileInputStream = new FileInputStream(fileName);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)
-        ) {
-            String str = (String) objectInputStream.readObject();
-            return new JSONObject(str);
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static JSONObject getJsonFromFile(String fileName) throws IOException {
+        String str = Files.readString(Path.of(fileName));
+        return new JSONObject(str);
     }
 
     public static boolean isFileExists(String fileName) {
