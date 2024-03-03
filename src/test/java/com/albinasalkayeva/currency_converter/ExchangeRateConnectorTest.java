@@ -1,8 +1,9 @@
 package com.albinasalkayeva.currency_converter;
 
 import org.json.JSONObject;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,12 +21,16 @@ public class ExchangeRateConnectorTest {
     @Mock
     JsonAndFileHelper jsonAndFileHelper;
 
-    @Test
-    public void testGetConversionRates_FileExistsAndUpToDate() throws IOException {
+    @ParameterizedTest
+    @CsvSource({
+            "USD, KZT, 450.7569",
+            "KZT, USD, 0.002219",
+            "RUB, KZT, 4.9285",
+            "KZT, RUB, 0.2029"
+    })
+    public void testGetConversionRates_FileExistsAndUpToDate(String baseCurrencyCode, String targetCurrencyCode,
+                                                             BigDecimal conversionRate) throws IOException {
         // Given
-        String baseCurrencyCode = "USD";
-        String targetCurrencyCode = "KZT";
-        BigDecimal conversionRate = BigDecimal.valueOf(450.7569);
         String fileName = "conversion_rates_" + baseCurrencyCode + ".json";
         ExchangeRateConnector connector = new ExchangeRateConnector(jsonAndFileHelper);
         Date currentDate = new Date();
