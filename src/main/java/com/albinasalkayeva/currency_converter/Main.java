@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        JsonAndFileHelper jsonAndFileHelper = new JsonAndFileHelper();
+        JsonAndFileHelper jsonAndFileHelper = new JsonAndFileHelperImpl();
         ExchangeRateConnector exchangeRateConnector = new ExchangeRateConnector(jsonAndFileHelper);
         ExchangeRateData exchangeRateData = new ExchangeRateData(exchangeRateConnector);
 
