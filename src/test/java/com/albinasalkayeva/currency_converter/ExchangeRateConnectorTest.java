@@ -91,4 +91,35 @@ public class ExchangeRateConnectorTest {
         assertTrue(result.containsKey(targetCurrencyCode));
         assertEquals(conversionRateAfterUpdate, result.get(targetCurrencyCode));
     }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/conversionRates.csv")
+    public void testGetConversionRates_FileDoesNotExist(String baseCurrencyCode, String targetCurrencyCode,
+                                                        BigDecimal conversionRate) throws IOException {
+        // Given
+        String fileName = "conversion_rates_" + baseCurrencyCode + ".json";
+        ExchangeRateConnector connector = new ExchangeRateConnector(jsonAndFileHelper);
+        Date currentDate = new Date();
+        int secondsInFuture = 5;
+        long timestampInFutureUnix = currentDate.getTime() / 1000 + secondsInFuture;
+
+        when(jsonAndFileHelper.isFileExists(fileName)).thenReturn(false);
+        JSONObject mockJson = new JSONObject();
+        mockJson.put("time_next_update_unix", timestampInFutureUnix);
+        mockJson.put("conversion_rates", new JSONObject().put(targetCurrencyCode, conversionRate));
+        when(jsonAndFileHelper.getJsonFromUrl(any())).thenReturn(mockJson);
+
+        // When
+        Map<String, BigDecimal> result = connector.getConversionRates(baseCurrencyCode);
+
+        // Then
+        InOrder inOrder = inOrder(jsonAndFileHelper);
+        inOrder.verify(jsonAndFileHelper, times(1)).isFileExists(fileName);
+        verify(jsonAndFileHelper, never()).getJsonFromFile(fileName);
+        inOrder.verify(jsonAndFileHelper, times(1)).getJsonFromUrl(any());
+        inOrder.verify(jsonAndFileHelper, times(1)).saveJsonToFile(any(), any());
+        assertEquals(1, result.size());
+        assertTrue(result.containsKey(targetCurrencyCode));
+        assertEquals(conversionRate, result.get(targetCurrencyCode));
+    }
 }
