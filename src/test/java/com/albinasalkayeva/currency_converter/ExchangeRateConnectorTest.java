@@ -1,6 +1,8 @@
 package com.albinasalkayeva.currency_converter;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -121,5 +123,47 @@ public class ExchangeRateConnectorTest {
         assertEquals(1, result.size());
         assertTrue(result.containsKey(targetCurrencyCode));
         assertEquals(conversionRate, result.get(targetCurrencyCode));
+    }
+
+    @Test
+    public void testGetSupportedCodesAndCurrencies_FileExists() throws IOException {
+        // Given
+        String fileName = "supported_codes.json";
+        ExchangeRateConnector connector = new ExchangeRateConnector(jsonAndFileHelper);
+
+        when(jsonAndFileHelper.isFileExists(fileName)).thenReturn(true);
+        JSONObject mockJsonSupportedCodes = new JSONObject();
+        JSONArray mockJsonSupportedCodesArray = new JSONArray();
+        JSONArray mockJsonKzt = new JSONArray();
+        mockJsonKzt.put("KZT");
+        mockJsonKzt.put("Kazakhstani Tenge");
+        JSONArray mockJsonRub = new JSONArray();
+        mockJsonRub.put("RUB");
+        mockJsonRub.put("Russian Ruble");
+        JSONArray mockJsonUsd = new JSONArray();
+        mockJsonUsd.put("USD");
+        mockJsonUsd.put("United States Dollar");
+        mockJsonSupportedCodesArray.put(mockJsonKzt);
+        mockJsonSupportedCodesArray.put(mockJsonRub);
+        mockJsonSupportedCodesArray.put(mockJsonUsd);
+        mockJsonSupportedCodes.put("supported_codes", mockJsonSupportedCodesArray);
+        when(jsonAndFileHelper.getJsonFromFile(fileName)).thenReturn(mockJsonSupportedCodes);
+
+        // When
+        Map<String, String> result = connector.getSupportedCodesAndCurrencies();
+
+        // Then
+        InOrder inOrder = inOrder(jsonAndFileHelper);
+        inOrder.verify(jsonAndFileHelper, times(1)).isFileExists(fileName);
+        inOrder.verify(jsonAndFileHelper, times(1)).getJsonFromFile(fileName);
+        verify(jsonAndFileHelper, never()).getJsonFromUrl(any());
+        verify(jsonAndFileHelper, never()).saveJsonToFile(any(), any());
+        assertEquals(3, result.size());
+        assertTrue(result.containsKey("KZT"));
+        assertTrue(result.containsKey("RUB"));
+        assertTrue(result.containsKey("USD"));
+        assertEquals("Kazakhstani Tenge", result.get("KZT"));
+        assertEquals("Russian Ruble", result.get("RUB"));
+        assertEquals("United States Dollar", result.get("USD"));
     }
 }
